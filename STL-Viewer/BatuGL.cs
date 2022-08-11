@@ -17,13 +17,13 @@ namespace BatuGL
 
         public static void Configure(OpenTK.GLControl refGLControl, Ortho_Mode ortho)
         {
-            GL.ClearColor(Color.Black);
+            GL.ClearColor(Color.White);
             refGLControl.VSync = false;
             GL.Clear(ClearBufferMask.ColorBufferBit);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
-            GL.ClearColor(Color.Black);
+            GL.ClearColor(Color.White);
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadIdentity();
             GL.Viewport(refGLControl.Size);
@@ -43,8 +43,8 @@ namespace BatuGL
             GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
             GL.Enable(EnableCap.LineSmooth);
             GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
-            GL.Enable(EnableCap.PolygonSmooth);
-            GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
+            //GL.Enable(EnableCap.PolygonSmooth);
+            //GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
         }
 
         public static void Draw_WCS(float size = 1000.0f)

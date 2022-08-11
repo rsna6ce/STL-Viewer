@@ -81,6 +81,7 @@
     <Compile Include="AppMainForm.Designer.cs">
       <DependentUpon>AppMainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MyGifEncorder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="STL_Tools\STLExport.cs" />

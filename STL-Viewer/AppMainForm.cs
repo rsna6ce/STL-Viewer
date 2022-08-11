@@ -12,6 +12,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Globalization;
 using System.Threading;
+using System.Collections.Generic;
 using STL_Tools;
 using OpenTK.Graphics.OpenGL;
 using BatuGL;
@@ -29,6 +30,10 @@ namespace STLViewer
         private Orbiter orb;
         Vector3 minPos = new Vector3();
         Vector3 maxPos = new Vector3();
+
+        int anigif_deg_step = 2;
+        int anigif_deg_curr = 0;
+        List<Bitmap> anigif_frames = new List<Bitmap>();
 
         public AppMainForm()
         {
@@ -117,7 +122,9 @@ namespace STLViewer
             if (modelVAO != null) ConfigureBasicLighting(modelVAO.color);
             GL.Translate(orb.PanX, orb.PanY, 0);
             GL.Rotate(orb.orbitStr.angle, orb.orbitStr.ox, orb.orbitStr.oy, orb.orbitStr.oz);
-            GL.Scale(orb.scaleVal, orb.scaleVal, orb.scaleVal);
+            GL.Rotate(-90, 1, 0, 0);
+            GL.Rotate(-anigif_deg_curr, 0, 0, 1);
+            GL.Scale(orb.scaleVal*4.0f, orb.scaleVal * 4.0f, orb.scaleVal * 4.0f);
             GL.Translate(-minPos.x, -minPos.y, -minPos.z);
             GL.Translate(-(maxPos.x - minPos.x) / 2.0f, -(maxPos.y - minPos.y) / 2.0f, -(maxPos.z - minPos.z) / 2.0f);
             if (modelVAO != null) modelVAO.Draw();
@@ -132,7 +139,7 @@ namespace STLViewer
             modelVAO = new Batu_GL.VAO_TRIANGLES();
             modelVAO.parameterArray = STLExport.Get_Mesh_Vertices(meshArray);
             modelVAO.normalArray = STLExport.Get_Mesh_Normals(meshArray);
-            modelVAO.color = Color.Crimson;
+            modelVAO.color = Color.LightGray;
             minPos = stlReader.GetMinMeshPosition(meshArray);
             maxPos = stlReader.GetMaxMeshPosition(meshArray);
             orb.Reset_Orientation();
@@ -163,16 +170,6 @@ namespace STLViewer
             Application.Exit();
         }
 
-        private void CloseBt_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
-
-        private void MinimizeBt_Click(object sender, EventArgs e)
-        {
-            this.WindowState = FormWindowState.Minimized;
-        }
-
         private void AppToolBarMStp_MouseDown(object sender, MouseEventArgs e)
         {
             moveForm = true;
@@ -193,31 +190,7 @@ namespace STLViewer
             else this.WindowState = FormWindowState.Maximized;
         }
 
-        private void AppTitleLb_MouseDown(object sender, MouseEventArgs e)
-        {
-            moveForm = true;
-            moveOffsetX = MousePosition.X - this.Location.X;
-            moveOffsetY = MousePosition.Y - this.Location.Y;
-        }
 
-        private void AppTitleLb_MouseUp(object sender, MouseEventArgs e)
-        {
-            moveForm = false;
-            moveOffsetX = 0;
-            moveOffsetY = 0;
-        }
-
-        private void AppTitleLb_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            if (this.WindowState == FormWindowState.Maximized) this.WindowState = FormWindowState.Normal;
-            else this.WindowState = FormWindowState.Maximized;
-        }
-
-        private void MaximizeBt_Click(object sender, EventArgs e)
-        {
-            if (this.WindowState == FormWindowState.Maximized) this.WindowState = FormWindowState.Normal;
-            else this.WindowState = FormWindowState.Maximized;
-        }
 
         private void GL_Monitor_DragDrop(object sender, DragEventArgs e)
         {
@@ -262,6 +235,58 @@ namespace STLViewer
         {
             AppAboutForm aboutForm = new AppAboutForm();
             aboutForm.ShowDialog();
+        }
+
+        private void testToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //debug
+        }
+
+        private void animationGIFToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            anigif_deg_curr = 0;
+            anigif_frames.Clear();
+            timerAnimationGif.Start();
+        }
+
+        private void timerAnimationGIF_Tick(object sender, EventArgs e)
+        {
+            GL_Monitor.Refresh();
+            if (OpenTK.Graphics.GraphicsContext.CurrentContext == null)
+                throw new OpenTK.Graphics.GraphicsContextMissingException();
+            int w = GL_Monitor.ClientSize.Width;
+            int h = GL_Monitor.ClientSize.Height;
+            Bitmap bmp = new Bitmap(w, h);
+            System.Drawing.Imaging.BitmapData data =
+                bmp.LockBits(GL_Monitor.ClientRectangle, System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            GL.ReadPixels(0, 0, w, h, PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
+            bmp.UnlockBits(data);
+
+            bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
+            anigif_frames.Add(bmp);
+
+            anigif_deg_curr += anigif_deg_step;
+            if (anigif_deg_curr >= 360)
+            {
+                var bmps = new List<MyGifEncorder.BitmapAndDelayTime>();
+                ushort delayTime = 3;
+                foreach (var f in anigif_frames)
+                {
+                    bmps.Add(new MyGifEncorder.BitmapAndDelayTime(f, delayTime));
+                }
+                timerAnimationGif.Stop();
+
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Title = "Save Animation GIF";
+                DateTime dt = DateTime.Now;
+                saveFileDialog.FileName = dt.ToString("yyyyMMdd_HHmmss") + ".gif";
+                DialogResult result = saveFileDialog.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    MyGifEncorder.SaveAnimatedGif(saveFileDialog.FileName, bmps, 0);
+                }                
+                anigif_deg_curr = 0;
+            }
         }
     }
 }
