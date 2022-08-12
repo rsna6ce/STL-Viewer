@@ -78,14 +78,14 @@ namespace STLViewer
             0.2f * modelColor.B / 255.0f,
             1.0f };
             float[] light_2 = new float[] {
-            3.0f * modelColor.R / 255.0f,
-            3.0f * modelColor.G / 255.0f,
-            3.0f * modelColor.B / 255.0f,
+            10.0f * modelColor.R / 255.0f,
+            10.0f * modelColor.G / 255.0f,
+            10.0f * modelColor.B / 255.0f,
             1.0f };
             float[] specref = new float[] { 
-                0.01f * modelColor.R / 255.0f, 
-                0.01f * modelColor.G / 255.0f, 
-                0.01f * modelColor.B / 255.0f, 
+                0.2f * modelColor.R / 255.0f, 
+                0.2f * modelColor.G / 255.0f, 
+                0.2f * modelColor.B / 255.0f, 
                 1.0f };
             float[] specular_0 = new float[] { -1.0f, -1.0f, 1.0f, 1.0f };
             float[] specular_1 = new float[] { 1.0f, -1.0f, 1.0f, 1.0f };
@@ -122,7 +122,7 @@ namespace STLViewer
             if (modelVAO != null) ConfigureBasicLighting(modelVAO.color);
             GL.Translate(orb.PanX, orb.PanY, 0);
             GL.Rotate(orb.orbitStr.angle, orb.orbitStr.ox, orb.orbitStr.oy, orb.orbitStr.oz);
-            GL.Rotate(-90, 1, 0, 0);
+            GL.Rotate(-70, 1, 0, 0);
             GL.Rotate(-anigif_deg_curr, 0, 0, 1);
             GL.Scale(orb.scaleVal*4.0f, orb.scaleVal * 4.0f, orb.scaleVal * 4.0f);
             GL.Translate(-minPos.x, -minPos.y, -minPos.z);
